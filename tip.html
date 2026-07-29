@@ -218,9 +218,13 @@
   }
 
   /* keyboard focus ring — Gumroad pink */
-  .tip:focus-visible, .wide:focus-visible, .pay:focus-visible, .back:focus-visible,
-  #custom-input:focus-visible {
+  .tip:focus-visible, .wide:focus-visible, .pay:focus-visible, .back:focus-visible {
     outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* the custom field shows a black focus outline (not pink) */
+  .field:focus-within {
+    outline: 3px solid var(--ink);
     outline-offset: 2px;
   }
 
@@ -244,7 +248,7 @@
     height: 49px; padding: 0 14px; gap: 6px;
     background: var(--paper);
   }
-  .field .cur { font-size: 16px; font-weight: 700; color: var(--muted); }
+  .field .cur { font-size: 16px; font-weight: 700; color: var(--ink); }
   #custom-input {
     flex: 1; border: none; outline: none; background: none;
     font-family: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
@@ -266,6 +270,11 @@
     margin-bottom: 16px;
   }
   .total .val { font-variant-numeric: tabular-nums; }
+  .total-right { display: inline-flex; align-items: baseline; gap: 8px; }
+  .total .tip-note {
+    font-weight: 400; font-size: 15px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
 
   hr.rule { border: none; border-top: var(--border); margin: 0 calc(-1 * var(--pad)) 16px; }
 
@@ -431,7 +440,10 @@
 
         <div class="total">
           <span>Total</span>
-          <span class="val" id="total-val">US$0.00</span>
+          <span class="total-right">
+            <span class="tip-note" id="total-tip"></span>
+            <span class="val" id="total-val">US$0.00</span>
+          </span>
         </div>
 
         <hr class="rule">
@@ -525,11 +537,14 @@
   var customWrap = $("#custom-wrap");
   var customInput= $("#custom-input");
   var totalVal   = $("#total-val");
+  var totalTip   = $("#total-tip");
 
   // --- Total roll animation --------------------------------------------
   var rollFrom = 0, rollRAF = null;
   function renderTotal(animate) {
     var to = currentTotal();
+    var tip = currentTip();
+    totalTip.textContent = tip > 0 ? "incl. " + money(tip) + " tip" : "";
     if (!animate) { totalVal.textContent = money(to); rollFrom = to; return; }
     if (rollRAF) cancelAnimationFrame(rollRAF);
     var from = rollFrom, start = null, dur = 320;
