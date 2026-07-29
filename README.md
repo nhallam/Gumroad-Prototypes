@@ -7,10 +7,17 @@ rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
 
 | File | What it is |
 |---|---|
-| `index.html` | **The page** — titled "Gumroad Tipping Prototype"; embeds the prototype and is where more prototypes stack below. |
-| `tip.html` | **The prototype** — the self-contained "Leave a tip?" flow (also opens standalone). |
+| `index.html` | **The page** — titled "Gumroad Tipping Prototype"; embeds the prototypes and is where more stack below. |
+| `tip.html` | **Concept 01** — the self-contained "Leave a tip?" bottom-sheet flow (also opens standalone). |
+| `checkout.html` | **Concept 02** — tipping built into a full two-column checkout page (also opens standalone). |
 
-`index.html` embeds `tip.html` in an `<iframe>`, so **serve the folder** to view the
+**Concept 02 — checkout tipping.** A tip module embedded in the order summary with a
+type switcher: **Percentage** (preset grid), **Custom** ($ input with "N people left a
+tip" social proof), **Round Up** (rounds the order up to the nearest $10), and
+**Let's have fun** (placeholder for now). Neutral grey marks the active mode/method;
+pink marks the chosen tip. The payment column is visual scaffolding (non-functional).
+
+`index.html` embeds the prototypes in `<iframe>`s, so **serve the folder** to view the
 page (e.g. `python3 -m http.server`, then open `/`). Opening `tip.html` directly
 in a browser works with no server. To add another prototype, drop a new
 `<section class="section">` into `index.html` above the "More coming soon" slot.
