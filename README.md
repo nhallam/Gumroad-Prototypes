@@ -51,7 +51,7 @@ Total stays consistent across every option and custom amount.
 - Buttons match gumroad.com: **rollover** lifts up-left with a hard black
   shadow; **click** collapses it flat (pressed into the page). The primary
   **Pay** button is black at rest and turns **pink** on hover, like "Start selling".
-- Selection: pink wash + shadow snap with a subtle **pop**
+- Selection: solid **brand pink** with a black hard shadow + a subtle **pop**
 - Total: **rolls** to the new value when the tip changes
 - Custom field: height/opacity **reveal**
 - Pay: press → **spinner**, then a slide **transition** to the success screen
