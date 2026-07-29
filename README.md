@@ -45,8 +45,14 @@ Total stays consistent across every option and custom amount.
 - Success: checkmark **badge-in** + **stroke draw**, staggered content, **confetti**
 - Respects `prefers-reduced-motion`
 
-Gumroad pink (`#ff90e8`) is used for focus rings and the success flourish; the
-core sheet stays monochrome to match the design.
+### Brand
+
+Typeset in **Hanken Grotesk** (a warm grotesk close to Gumroad's Mabry),
+bundled inline as a base64 woff2 so the file stays self-contained/offline-safe —
+no CDN. Gumroad pink (`#ff90e8`) is used deliberately: a top seam on the sheet,
+the selected tip (pink wash + pink hard shadow), the Pay button's hard shadow,
+focus rings, and the success flourish. Crisp 1px black borders and pure-black
+hard offset shadows complete the neo-brutalist look.
 
 ## Responsive behaviour
 
