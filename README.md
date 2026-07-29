@@ -11,6 +11,9 @@ rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
 | `tip.html` | **Concept 01** — the self-contained "Leave a tip?" bottom-sheet flow (also opens standalone). |
 | `checkout.html` | **Concept 02** — tipping built into a full two-column checkout page (also opens standalone). |
 | `upsell.html` | **Concept 03** — a pink "Leave a tip?" upsell panel shown on Pay (also opens standalone). |
+| `thankyou.html` | **Concept 04** — the thank-you moment: tip on the post-purchase download page (also opens standalone). |
+| `backcreator.html` | **Concept 05** — back the creator: goal progress, supporters and a perk (also opens standalone). |
+| `slider.html` | **Concept 06** — one fair-price slider that merges price and tip (also opens standalone). |
 
 **Concept 02 — checkout tipping.** A tip module embedded in the order summary with a
 type switcher: **Percentage** (preset grid), **Custom** ($ input with "N people left a
@@ -25,6 +28,24 @@ swaps it for a bold **pink "Leave a tip?" panel** with a **$ Amount / % Percenta
 toggle and presets ($0.25 / $0.5 / $1 / $2 / $5, or 5–25%) + **No tip**. Picking one
 updates the Total (in the panel and the order summary); Pay completes to a thank-you.
 The left column adds a **"Give as a gift"** toggle. Payment is scaffolding.
+
+**Concept 04 — the thank-you moment.** The tip ask moves *after* the sale: on the
+post-purchase download page, once the buyer already has what they paid for, a
+gratitude-framed card invites a tip ($1 / $2 / $5 / Custom) with an optional note.
+Sending swaps the card for a "💛 Sent" confirmation and a mock reply from the creator —
+no pressure at checkout, gratitude instead of an upsell.
+
+**Concept 05 — back the creator.** Reframes the tip as *backing a goal*. A progress bar
+shows how close the creator is to a funding goal, with supporter avatars and a live
+count; picking an amount previews the bar moving, bumps the supporter count, and reveals
+a matching perk (thank-you note → credits → early access). Paying adds you as the next
+supporter ("You're supporter #37").
+
+**Concept 06 — one fair-price slider.** Merges price *and* tip into a single
+"pay what feels fair" slider anchored at the base price (US$1.08), with a "most people
+pay US$3" marker and preset chips (Base only / Fair / Generous / Champion). The creator's
+avatar reacts as you drag (🙂 → 😊 → 😍 → 🤩) and the breakdown shows "Base + US$X tip"
+live. Fully keyboard-accessible (native range input).
 
 `index.html` embeds the prototypes in `<iframe>`s, so **serve the folder** to view the
 page (e.g. `python3 -m http.server`, then open `/`). Opening `tip.html` directly
