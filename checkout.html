@@ -161,11 +161,26 @@
   .roundup .ru-sub{ font-size:13px; color:rgba(0,0,0,.6); margin-top:1px; }
   .roundup .ru-amt{ font-size:18px; font-weight:800; font-variant-numeric:tabular-nums; }
 
-  /* fun placeholder */
-  .fun{ border:2px dashed var(--hair); border-radius:var(--radius-sm); padding:26px 16px; text-align:center; color:var(--muted); }
-  .fun .fun-emoji{ font-size:26px; }
-  .fun strong{ display:block; color:var(--ink); margin:6px 0 2px; font-size:15px; }
-  .fun span{ font-size:13px; }
+  /* Coin Catch game */
+  .game{ position:relative; width:100%; height:214px; border:var(--border); border-radius:var(--radius-sm); overflow:hidden; background:var(--stage, #f4f4f1); }
+  .game canvas{ display:block; width:100%; height:100%; }
+  .g-hud{ position:absolute; top:9px; left:12px; right:12px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; pointer-events:none; visibility:hidden; font-variant-numeric:tabular-nums; }
+  .g-screen{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:16px;
+    background:color-mix(in srgb, var(--paper) 86%, transparent); }
+  .g-screen[hidden]{ display:none; }
+  .g-title{ font-size:17px; font-weight:800; letter-spacing:-.01em; }
+  .g-sub{ font-size:13px; color:var(--muted); line-height:1.45; }
+  .g-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .g-btn{ font-family:inherit; font-size:14px; font-weight:700; color:var(--ink); background:var(--paper);
+    border:var(--border); border-radius:var(--radius-sm); padding:9px 16px; cursor:pointer;
+    transition:transform .15s var(--ease-out), box-shadow .15s var(--ease-out), background-color .15s var(--ease-out); }
+  .g-btn:hover{ transform:translate(-3px,-3px); box-shadow:5px 5px 0 var(--ink); }
+  .g-btn:active{ transform:translate(0,0); box-shadow:none; transition-duration:.04s; }
+  .g-btn.primary{ background:var(--ink); color:var(--paper); }
+  .g-btn.primary:hover{ background:var(--pink); color:#000; }
+  .g-btn[disabled]{ opacity:.9; cursor:default; transform:none; box-shadow:none; background:var(--pink); color:#000; }
+  .g-btn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  :root[data-theme="dark"] .g-screen{ background:color-mix(in srgb, var(--paper) 82%, transparent); }
 
   .tiprow{ margin-top:16px; }
 
@@ -302,12 +317,24 @@
               <div class="ru-amt" id="ru-amt">+US$8.92</div>
             </div>
           </div>
-          <!-- fun placeholder -->
+          <!-- Coin Catch mini-game -->
           <div class="panel" id="p-fun" hidden>
-            <div class="fun">
-              <div class="fun-emoji" aria-hidden="true">🎮</div>
-              <strong>Something fun is on the way</strong>
-              <span>A playful way to tip — coming soon.</span>
+            <div class="game" id="game">
+              <canvas id="gcanvas"></canvas>
+              <div class="g-hud" id="g-hud"><span id="g-score">0 coins</span><span id="g-time">12s</span></div>
+              <div class="g-screen" id="g-start">
+                <div class="g-title">🪙 Coin Catch</div>
+                <div class="g-sub">Use&nbsp; ← →&nbsp; to catch coins. Each coin = US$0.10.<br>Your catch becomes the tip.</div>
+                <button class="g-btn primary" type="button" id="g-play">Start</button>
+              </div>
+              <div class="g-screen" id="g-result" hidden>
+                <div class="g-title" id="g-result-title">Nice catch!</div>
+                <div class="g-sub" id="g-result-sub">You caught 0 coins</div>
+                <div class="g-actions">
+                  <button class="g-btn primary" type="button" id="g-use">Use US$0.00 tip</button>
+                  <button class="g-btn" type="button" id="g-again">Play again</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -404,7 +431,7 @@
   function money(n){ return "US$"+(Math.round(n*100)/100).toFixed(2); }
   function round2(n){ return Math.round(n*100)/100; }
 
-  var state={ mode:"percentage", pctIndex:DEFAULT_PCT, custom:0, skipped:false };
+  var state={ mode:"percentage", pctIndex:DEFAULT_PCT, custom:0, funTip:0, skipped:false };
 
   // build percentage presets
   var presets=$("#presets");
@@ -432,7 +459,8 @@
       case "percentage": return round2(SUBTOTAL*PCTS[state.pctIndex]/100);
       case "custom": return round2(state.custom||0);
       case "roundup": return round2(roundTarget-SUBTOTAL);
-      default: return 0; // fun placeholder
+      case "fun": return round2(state.funTip||0);
+      default: return 0;
     }
   }
 
@@ -448,6 +476,7 @@
     Object.keys(panels).forEach(function(k){ panels[k].hidden=(k!==mode); });
     if(mode==="percentage") paintPresets();
     if(mode==="custom") setTimeout(function(){ $("#custom").focus(); },140);
+    if(mode==="fun"){ game.enter(); } else { game.stop(); }
     render();
   }
   types.forEach(function(t){ t.addEventListener("click",function(){ setMode(t.getAttribute("data-mode")); }); });
@@ -471,6 +500,95 @@
     $("#c-tip").textContent=money(tip);
     $("#c-total").textContent=money(SUBTOTAL+tip);
   }
+
+  // ---- Coin Catch mini-game ----
+  var game=(function(){
+    var wrap=$("#game"), cv=$("#gcanvas"), ctx=cv.getContext("2d");
+    var hud=$("#g-hud"), scoreEl=$("#g-score"), timeEl=$("#g-time");
+    var startScr=$("#g-start"), resultScr=$("#g-result");
+    var resTitle=$("#g-result-title"), resSub=$("#g-result-sub"), useBtn=$("#g-use");
+    var FONT='"Hanken Grotesk",-apple-system,sans-serif';
+    var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0;
+    var coins=[], score=0, caught=0, running=false, raf=null, startT=0, lastT=0, lastSpawn=0, gained=0;
+    var DUR=12000, COIN=0.10, GOLD=0.30, CAP=5.00;
+
+    function size(){
+      dpr=Math.min(window.devicePixelRatio||1,2);
+      var r=wrap.getBoundingClientRect(); W=Math.round(r.width); H=Math.round(r.height);
+      cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); jarY=H-32;
+    }
+    function rr(x,y,w,h,r){ ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+      else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    }
+    function spawn(){ coins.push({ x:16+Math.random()*(W-32), y:-14, vy:1.6+Math.random()*1.5, r:11, gold:Math.random()<0.16 }); }
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle="rgba(0,0,0,.10)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,jarY+15); ctx.lineTo(W,jarY+15); ctx.stroke();
+      for(var i=0;i<coins.length;i++){ var c=coins[i];
+        ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+        ctx.fillStyle=c.gold?"#ff90e8":"#ffc900"; ctx.fill();
+        ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
+        ctx.fillStyle="#000"; ctx.font="800 12px "+FONT; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(c.gold?"★":"$", c.x, c.y+0.5);
+      }
+      var bw=jarW, bx=jarX-bw/2, by=jarY, bh=20;
+      rr(bx,by,bw,bh,5); ctx.fillStyle="#ff90e8"; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle="#000"; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx-3,by+1); ctx.lineTo(bx+bw+3,by+1); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+    }
+    function step(t){
+      if(!running) return;
+      var dt=Math.min((t-lastT)/16.67,3); lastT=t;
+      if(t-lastSpawn>520){ spawn(); lastSpawn=t; }
+      jarX+=dir*6.4*dt; jarX=Math.max(jarW/2, Math.min(W-jarW/2, jarX));
+      var ramp=1+(t-startT)/DUR*0.5;
+      for(var i=coins.length-1;i>=0;i--){ var c=coins[i]; c.y+=c.vy*dt*ramp;
+        if(c.y+c.r>=jarY && c.y-c.r<=jarY+16 && Math.abs(c.x-jarX)<=jarW/2+c.r*0.35){
+          score+=c.gold?GOLD:COIN; caught++; coins.splice(i,1); continue;
+        }
+        if(c.y-c.r>H) coins.splice(i,1);
+      }
+      var rem=Math.max(0,DUR-(t-startT));
+      timeEl.textContent=Math.ceil(rem/1000)+"s";
+      scoreEl.textContent=caught+" coins · "+money(Math.min(score,CAP));
+      draw();
+      if(rem<=0){ end(); return; }
+      raf=requestAnimationFrame(step);
+    }
+    function play(){
+      startScr.hidden=true; resultScr.hidden=true; hud.style.visibility="visible";
+      size(); coins=[]; score=0; caught=0; jarX=W/2; dir=0; running=true;
+      raf=requestAnimationFrame(function(t){ startT=t; lastT=t; lastSpawn=t; step(t); });
+    }
+    function end(){
+      running=false; if(raf) cancelAnimationFrame(raf);
+      gained=Math.min(round2(score), CAP);
+      resTitle.textContent = caught>=16?"Coin master! 🤩" : caught>=8?"Nice catch! 🪙" : "Every coin counts 🙂";
+      resSub.textContent="You caught "+caught+" coin"+(caught===1?"":"s")+" — that's "+money(gained);
+      useBtn.disabled=false; useBtn.textContent="Use "+money(gained)+" tip";
+      hud.style.visibility="hidden"; resultScr.hidden=false;
+    }
+    window.addEventListener("keydown",function(e){
+      if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A"){ dir=-1; if(running) e.preventDefault(); }
+      else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D"){ dir=1; if(running) e.preventDefault(); }
+    });
+    window.addEventListener("keyup",function(e){
+      if((e.key==="ArrowLeft"||e.key==="a"||e.key==="A")&&dir<0) dir=0;
+      if((e.key==="ArrowRight"||e.key==="d"||e.key==="D")&&dir>0) dir=0;
+    });
+    window.addEventListener("resize",function(){ if(running) size(); });
+    $("#g-play").addEventListener("click",play);
+    $("#g-again").addEventListener("click",play);
+    useBtn.addEventListener("click",function(){
+      state.funTip=gained; render();
+      useBtn.disabled=true; useBtn.textContent="Added ✓  "+money(gained);
+      resTitle.textContent="Added to your tip ✓";
+    });
+    return {
+      enter:function(){ running=false; if(raf)cancelAnimationFrame(raf); hud.style.visibility="hidden"; resultScr.hidden=true; startScr.hidden=false; },
+      stop:function(){ running=false; if(raf)cancelAnimationFrame(raf); }
+    };
+  })();
 
   // payment method toggle (visual only)
   document.querySelectorAll(".method").forEach(function(m){
