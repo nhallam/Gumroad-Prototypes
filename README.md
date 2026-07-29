@@ -10,6 +10,7 @@ rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
 | `index.html` | **The page** — titled "Gumroad Tipping Prototype"; embeds the prototypes and is where more stack below. |
 | `tip.html` | **Concept 01** — the self-contained "Leave a tip?" bottom-sheet flow (also opens standalone). |
 | `checkout.html` | **Concept 02** — tipping built into a full two-column checkout page (also opens standalone). |
+| `upsell.html` | **Concept 03** — a pink "Leave a tip?" upsell panel shown on Pay (also opens standalone). |
 
 **Concept 02 — checkout tipping.** A tip module embedded in the order summary with a
 type switcher: **Percentage** (preset grid), **Custom** ($ input with "N people left a
@@ -18,6 +19,12 @@ tip" social proof), **Round Up** (rounds the order up to the nearest $10), and
 coins over 12s; each coin is US$0.10, gold ones US$0.30; your score becomes the tip).
 Neutral grey marks the active mode/method;
 pink marks the chosen tip. The payment column is visual scaffolding (non-functional).
+
+**Concept 03 — tip upsell.** The right column shows the payment form; clicking **Pay**
+swaps it for a bold **pink "Leave a tip?" panel** with a **$ Amount / % Percentage**
+toggle and presets ($0.25 / $0.5 / $1 / $2 / $5, or 5–25%) + **No tip**. Picking one
+updates the Total (in the panel and the order summary); Pay completes to a thank-you.
+The left column adds a **"Give as a gift"** toggle. Payment is scaffolding.
 
 `index.html` embeds the prototypes in `<iframe>`s, so **serve the folder** to view the
 page (e.g. `python3 -m http.server`, then open `/`). Opening `tip.html` directly
