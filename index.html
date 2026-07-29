@@ -16,35 +16,69 @@
      ============================================================ */
 
   :root {
-    --ink:      #000000;
-    --paper:    #ffffff;
-    --muted:    rgba(0,0,0,.42);
-    --selected: #f4f4f4;
-    --canvas:   #f4f4f0;
-    --accent:      #ff90e8;   /* Gumroad pink */
-    --accent-ink:  #d13fb0;   /* darker pink for text on light */
-    --accent-tint: #ffe9fa;   /* pink wash */
+    /* Gumroad brand palette (antiwork/gumroad · _definitions.scss) */
+    --pink:   #ff90e8;
+    --purple: #90a8ed;
+    --green:  #23a094;
+    --orange: #ffc900;
+    --red:    #dc341e;
+    --yellow: #f1f333;
+    --accent: var(--pink);
 
-    --border: 1px solid var(--ink);
-    --radius-frame: 16px;
-    --radius-card: 6px;
+    /* role tokens — light (Gumroad default) */
+    --ink:      #000000;   /* --primary / --black : text + borders */
+    --paper:    #ffffff;   /* --filled : surfaces */
+    --canvas:   #f4f4f0;   /* --body-bg */
+    --muted:    rgba(0,0,0,.5);    /* gray 0.5 */
+    --hair:     rgba(0,0,0,.2);    /* gray 0.2 : hairlines/handle */
+    --accent-ink:  #a1348c;        /* pink, darkened for text on light */
+    --accent-tint: #ffe9fa;        /* pink wash for selected */
+
+    --border-w: 1px;
+    --border: var(--border-w) solid var(--ink);
+    --radius-frame: 8px;   /* 0.5rem */
+    --radius-card: 4px;    /* 0.25rem */
 
     --gap: 12px;
     --pad: 20px;
 
-    /* Gumroad hard shadow offsets */
-    --shadow-rest: 2px 2px 0;
-    --shadow-hover: 5px 5px 0;
-    --shadow-sel: 4px 4px 0;
+    /* Gumroad hard shadow offsets: 0.25rem / 0.5rem, no blur */
+    --shadow-sm: 4px 4px 0;
+    --shadow-lg: 8px 8px 0;
 
     /* motion */
     --ease-out: cubic-bezier(.2,.8,.24,1);
     --ease-pop: cubic-bezier(.34,1.56,.64,1);
     --dur: .22s;
 
-    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* ABC Favorit is Gumroad's brand face (proprietary); Hanken Grotesk
+       is bundled above as a close, freely-licensed stand-in. */
+    font-family: "ABC Favorit", "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-feature-settings: "ss01" on;
   }
+
+  /* Dark theme — Gumroad's own dark tokens (body #242423, text #ddd, filled #000) */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink:      #dddddd;
+      --paper:    #121212;
+      --canvas:   #242423;
+      --muted:    rgba(221,221,221,.55);
+      --hair:     rgba(221,221,221,.22);
+      --accent-ink:  #ff90e8;
+      --accent-tint: rgba(255,144,232,.16);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink:      #dddddd;
+    --paper:    #121212;
+    --canvas:   #242423;
+    --muted:    rgba(221,221,221,.55);
+    --hair:     rgba(221,221,221,.22);
+    --accent-ink:  #ff90e8;
+    --accent-tint: rgba(255,144,232,.16);
+  }
+  :root[data-theme="light"] { color-scheme: light; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -75,7 +109,7 @@
     border-radius: var(--radius-frame);
     padding: var(--pad);
     overflow: hidden;
-    box-shadow: 6px 6px 0 var(--ink);
+    box-shadow: var(--shadow-lg) var(--ink);
     animation: sheet-in .5s var(--ease-out) both;
   }
   /* pink brand seam along the top of the sheet */
@@ -153,7 +187,7 @@
   /* hover: lift with hard shadow */
   .tip:hover, .wide:hover {
     transform: translate(-2px,-2px);
-    box-shadow: var(--shadow-hover) var(--ink);
+    box-shadow: var(--shadow-sm) var(--ink);
   }
   /* active press: collapse shadow */
   .tip:active, .wide:active, .pay:active {
@@ -165,12 +199,12 @@
   /* selected state — Gumroad pink: pink wash + pink hard offset shadow */
   .tip.is-selected, .wide.is-selected {
     background: var(--accent-tint);
-    box-shadow: var(--shadow-sel) var(--accent);
+    box-shadow: var(--shadow-sm) var(--accent);
     transform: translate(-1px,-1px);
     animation: pop .28s var(--ease-pop);
   }
   .tip.is-selected:hover, .wide.is-selected:hover {
-    box-shadow: var(--shadow-hover) var(--accent);
+    box-shadow: var(--shadow-lg) var(--accent);
   }
   .tip.is-selected .sub { color: var(--accent-ink); }
   @keyframes pop {
@@ -237,17 +271,17 @@
     background: var(--ink); color: var(--paper);
     font-size: 16px; font-weight: 700; letter-spacing: -.01em;
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-sel) var(--accent);
+    box-shadow: var(--shadow-sm) var(--accent);
   }
-  .pay:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-hover) var(--accent); }
+  .pay:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg) var(--accent); }
   .pay .spinner {
     width: 17px; height: 17px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+    border: 2px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor;
     animation: spin .6s linear infinite; display: none;
   }
   .pay.is-loading .label { display: none; }
   .pay.is-loading .spinner { display: block; }
-  .pay.is-loading { transform: none; box-shadow: var(--shadow-sel) var(--accent); cursor: default; }
+  .pay.is-loading { transform: none; box-shadow: var(--shadow-sm) var(--accent); cursor: default; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ============================================================
@@ -260,7 +294,7 @@
     border: var(--border);
     display: grid; place-items: center;
     background: var(--accent);
-    box-shadow: 3px 3px 0 var(--ink);
+    box-shadow: var(--shadow-sm) var(--ink);
     animation: badge-in .5s var(--ease-pop) both;
   }
   @keyframes badge-in {
@@ -291,7 +325,7 @@
   .receipt .row { display: flex; justify-content: space-between; font-size: 15px; }
   .receipt .row .k { color: var(--muted); }
   .receipt .row .v { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .receipt .row.tot { border-top: 1px dashed rgba(0,0,0,.25); padding-top: 8px; }
+  .receipt .row.tot { border-top: 1px dashed var(--hair); padding-top: 8px; }
 
   /* stagger entrance of success content */
   .success h2      { animation: rise .45s var(--ease-out) .18s both; }
@@ -338,7 +372,7 @@
     .sheet::before {  /* grab handle */
       content: ""; position: absolute; top: 9px; left: 50%;
       transform: translateX(-50%);
-      width: 40px; height: 4px; border-radius: 2px; background: rgba(0,0,0,.18);
+      width: 40px; height: 4px; border-radius: 2px; background: var(--hair);
     }
     hr.rule { margin-left: -18px; margin-right: -18px; }
   }

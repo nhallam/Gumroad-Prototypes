@@ -45,14 +45,27 @@ Total stays consistent across every option and custom amount.
 - Success: checkmark **badge-in** + **stroke draw**, staggered content, **confetti**
 - Respects `prefers-reduced-motion`
 
-### Brand
+### Brand — aligned to Gumroad's real design system
 
-Typeset in **Hanken Grotesk** (a warm grotesk close to Gumroad's Mabry),
-bundled inline as a base64 woff2 so the file stays self-contained/offline-safe —
-no CDN. Gumroad pink (`#ff90e8`) is used deliberately: a top seam on the sheet,
-the selected tip (pink wash + pink hard shadow), the Pay button's hard shadow,
-focus rings, and the success flourish. Crisp 1px black borders and pure-black
-hard offset shadows complete the neo-brutalist look.
+The tokens are taken from the open-source Gumroad app
+([antiwork/gumroad](https://github.com/antiwork/gumroad),
+`app/javascript/stylesheets/_definitions.scss` & `_font.scss`):
+
+- **Palette** — `--pink #ff90e8` (accent), plus `--purple #90a8ed`,
+  `--green #23a094`, `--orange #ffc900`, `--red #dc341e`, `--yellow #f1f333`;
+  `--body-bg #f4f4f0`.
+- **Borders** — 1px solid, **radii** 4px / 8px, **hard shadows** `4px 4px 0`
+  and `8px 8px 0` (no blur) — Gumroad's neo-brutalist offset look.
+- **Type** — Gumroad's brand face is **ABC Favorit** (proprietary), named first
+  in the stack; **Hanken Grotesk** is bundled inline as a base64 woff2 as a
+  freely-licensed stand-in, so the file stays self-contained/offline-safe.
+- **Dark mode** — uses Gumroad's own dark tokens (`--body-bg #242423`, text
+  `#dddddd`, surfaces black). The page follows the viewer's OS/theme toggle;
+  the hard shadow flips to light, exactly like Gumroad's dark theme.
+
+Pink is used deliberately: a top seam on the sheet, the selected tip (pink wash
++ pink hard shadow + pink subtext), the Pay button's hard shadow, focus rings,
+and the success flourish.
 
 ## Responsive behaviour
 
