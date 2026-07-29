@@ -28,7 +28,7 @@
     /* role tokens — light (Gumroad default) */
     --ink:      #000000;   /* --primary / --black : text + borders */
     --paper:    #ffffff;   /* --filled : surfaces */
-    --canvas:   #f4f4f0;   /* --body-bg */
+    --canvas:   #ffffff;   /* page behind the sheet (white) */
     --muted:    rgba(0,0,0,.5);    /* gray 0.5 */
     --hair:     rgba(0,0,0,.2);    /* gray 0.2 : hairlines/handle */
     --accent-ink:  #a1348c;        /* pink, darkened for text on light */
@@ -92,10 +92,6 @@
     display: grid;
     place-items: center;
     padding: 24px 16px;
-    /* subtle textured backdrop for desktop context */
-    background-image:
-      radial-gradient(circle at 20% 15%, rgba(255,144,232,.10), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(0,0,0,.04), transparent 40%);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
