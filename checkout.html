@@ -512,7 +512,8 @@
     var resTitle=$("#g-result-title"), resSub=$("#g-result-sub"), useBtn=$("#g-use");
     var timerBar=$("#g-timerbar"), bar=$("#g-bar");
     var FONT='"Hanken Grotesk",-apple-system,sans-serif';
-    var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0;
+    var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0, vel=0;
+    var ACC=1.0, FRIC=0.80, MAXV=8;   // basket: acceleration, friction, max speed
     var coins=[], score=0, caught=0, running=false, raf=null, startT=0, lastT=0, lastSpawn=0, gained=0;
     var pop=0, pops=[];  // basket squash + floating "+$" feedback
     var DUR=30000, COIN=0.10, GOLD=0.30, CAP=5.00;
@@ -557,7 +558,11 @@
       if(!running) return;
       var dt=Math.min((t-lastT)/16.67,3); lastT=t;
       if(t-lastSpawn>520){ spawn(); lastSpawn=t; }
-      jarX+=dir*6.4*dt; jarX=Math.max(jarW/2, Math.min(W-jarW/2, jarX));
+      vel += dir*ACC*dt;                       // build up speed while a key is held
+      if(dir===0) vel *= Math.pow(FRIC, dt);   // coast to a stop on release
+      vel = Math.max(-MAXV, Math.min(MAXV, vel));
+      jarX += vel*dt;
+      if(jarX < jarW/2){ jarX=jarW/2; vel=0; } else if(jarX > W-jarW/2){ jarX=W-jarW/2; vel=0; }  // stop at walls
       var ramp=1+(t-startT)/DUR*0.5;
       for(var i=coins.length-1;i>=0;i--){ var c=coins[i]; c.y+=c.vy*dt*ramp;
         if(c.y+c.r>=jarY && c.y-c.r<=jarY+16 && Math.abs(c.x-jarX)<=jarW/2+c.r*0.35){
@@ -581,7 +586,7 @@
     function play(){
       startScr.hidden=true; resultScr.hidden=true;
       hud.style.visibility="visible"; timerBar.style.visibility="visible"; bar.style.width="100%";
-      size(); coins=[]; score=0; caught=0; pop=0; pops=[]; jarX=W/2; dir=0; running=true;
+      size(); coins=[]; score=0; caught=0; pop=0; pops=[]; jarX=W/2; dir=0; vel=0; running=true;
       raf=requestAnimationFrame(function(t){ startT=t; lastT=t; lastSpawn=t; step(t); });
     }
     function end(){
