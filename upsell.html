@@ -110,18 +110,19 @@
   .tip-panel h2{ font-size:21px; font-weight:800; letter-spacing:-.02em; }
   .tip-panel p{ font-size:13.5px; margin-top:7px; line-height:1.5; color:var(--muted); }
   .modeseg{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
-  .mode{ border:var(--border); border-radius:var(--radius-sm); background:var(--pink); color:#000; padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer;
+  .mode{ border:var(--border); border-radius:var(--radius-sm); background:var(--paper); color:var(--ink); padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer;
     transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s, color .12s; }
-  .mode:hover{ transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--ink); }
+  .mode:hover{ background:var(--pink); color:#000; transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--ink); }
   .mode:active{ transform:none; box-shadow:none; }
-  .mode.on{ background:var(--ink); color:var(--paper); }
+  .mode.on, .mode.on:hover{ background:var(--ink); color:var(--paper); }
   .tips{ display:flex; flex-direction:column; gap:9px; margin-top:9px; }
-  .tipbtn{ border:var(--border); border-radius:var(--radius-sm); background:var(--pink); color:#000; padding:13px; font-weight:700; font-size:15px; cursor:pointer; text-align:center;
+  .tipbtn{ border:var(--border); border-radius:var(--radius-sm); background:var(--paper); color:var(--ink); padding:13px; font-weight:700; font-size:15px; cursor:pointer; text-align:center;
     transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s, color .12s; }
-  .tipbtn .sub{ font-weight:400; color:rgba(0,0,0,.55); font-size:13px; }
-  .tipbtn:hover{ transform:translate(-3px,-3px); box-shadow:5px 5px 0 var(--ink); }
+  .tipbtn .sub{ font-weight:400; color:var(--muted); font-size:13px; }
+  .tipbtn:hover{ background:var(--pink); color:#000; transform:translate(-3px,-3px); box-shadow:5px 5px 0 var(--ink); }
+  .tipbtn:hover .sub{ color:rgba(0,0,0,.55); }
   .tipbtn:active{ transform:none; box-shadow:none; transition-duration:.04s; }
-  .tipbtn.on{ background:var(--ink); color:var(--paper); } .tipbtn.on .sub{ color:var(--paper); opacity:.6; }
+  .tipbtn.on, .tipbtn.on:hover{ background:var(--ink); color:var(--paper); } .tipbtn.on .sub{ color:var(--paper); opacity:.6; }
   .tp-total{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; font-size:17px; margin-top:16px; padding-top:13px; border-top:1px solid var(--hair); }
   .tp-total .val{ font-variant-numeric:tabular-nums; }
   .tp-pay{ width:100%; height:50px; margin-top:14px; background:var(--ink); color:var(--paper); border:var(--border); border-radius:var(--radius-sm); font-size:16px; font-weight:700; cursor:pointer;
