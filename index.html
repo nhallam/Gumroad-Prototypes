@@ -16,7 +16,8 @@
 
     --ink:    #000000;   /* text + borders */
     --paper:  #ffffff;   /* surfaces */
-    --canvas: #f4f4f1;   /* ground the components sit on */
+    --canvas: #ffffff;   /* main site background (white) */
+    --stage:  #f4f4f1;   /* the ground components sit on */
     --muted:  rgba(0,0,0,.55);
     --hair:   rgba(0,0,0,.14);
     --accent-tint: #ffe9fa;
@@ -34,14 +35,14 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ink: #dddddd; --paper: #1a1a19; --canvas: #242423;
+      --ink: #dddddd; --paper: #1a1a19; --canvas: #1a1a19; --stage: #242423;
       --muted: rgba(221,221,221,.6); --hair: rgba(221,221,221,.16);
       --accent-tint: rgba(255,144,232,.16);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --ink: #dddddd; --paper: #1a1a19; --canvas: #242423;
+    --ink: #dddddd; --paper: #1a1a19; --canvas: #1a1a19; --stage: #242423;
     --muted: rgba(221,221,221,.6); --hair: rgba(221,221,221,.16);
     --accent-tint: rgba(255,144,232,.16);
     color-scheme: dark;
@@ -142,7 +143,7 @@
   .btn:active { transform: translate(0,0); box-shadow: none; transition-duration: .04s; }
   .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-  .figure__frame { position: relative; background: var(--canvas); }
+  .figure__frame { position: relative; background: var(--stage); }
   .figure__frame iframe { width: 100%; height: 640px; border: 0; display: block; }
 
   /* Fullscreen toggle */
