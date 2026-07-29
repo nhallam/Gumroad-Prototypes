@@ -256,8 +256,23 @@
   .wide {
     width: 100%; height: 49px;
     font-size: 16px; font-weight: 700; letter-spacing: -.01em;
-    margin-bottom: 22px;
+    margin-bottom: 16px;
   }
+
+  /* ---------- Social proof ---------- */
+  .social { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .avatars { display: flex; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+    border: 2.5px solid var(--paper); background: var(--paper);
+    margin-left: -11px;
+  }
+  .avatar:first-child { margin-left: 0; }
+  .avatars .avatar:nth-child(1) { z-index: 3; }
+  .avatars .avatar:nth-child(2) { z-index: 2; }
+  .avatars .avatar:nth-child(3) { z-index: 1; }
+  .avatar svg { width: 100%; height: 100%; display: block; }
+  .social-copy { font-size: 14px; font-weight: 600; color: var(--muted); }
 
   /* ---------- Total ---------- */
   .total {
@@ -433,6 +448,21 @@
         </div>
 
         <button class="wide" type="button" id="btn-notip" role="radio" aria-checked="false">No tip</button>
+
+        <div class="social">
+          <div class="avatars" aria-hidden="true">
+            <span class="avatar">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#90a8ed"/><path d="M16 100C16 74 82 74 84 100Z" fill="#f4f4f0"/><circle cx="50" cy="45" r="18" fill="#f3c9a6"/><path d="M31 48C31 23 69 23 69 48c0-15-8-20-19-20s-19 5-19 20Z" fill="#3b2417"/></svg>
+            </span>
+            <span class="avatar">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#ffc900"/><path d="M16 100C16 74 82 74 84 100Z" fill="#23a094"/><circle cx="50" cy="45" r="18" fill="#8d5a3c"/><path d="M30 46c0-26 40-26 40 0 2-9 0-24-20-24S28 37 30 46Z" fill="#140d06"/></svg>
+            </span>
+            <span class="avatar">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#23a094"/><path d="M16 100C16 74 82 74 84 100Z" fill="#ff90e8"/><circle cx="50" cy="45" r="18" fill="#e8b98f"/><path d="M30 50C28 25 72 25 70 50c4-8 6-28-20-28S26 42 30 50Z" fill="#6b3a1a"/></svg>
+            </span>
+          </div>
+          <span class="social-copy">12 other people left tips</span>
+        </div>
 
         <div class="total">
           <span>Total</span>
