@@ -164,7 +164,9 @@
   /* Coin Catch game */
   .game{ position:relative; width:100%; height:214px; border:var(--border); border-radius:var(--radius-sm); overflow:hidden; background:var(--stage, #f4f4f1); }
   .game canvas{ display:block; width:100%; height:100%; }
-  .g-hud{ position:absolute; top:9px; left:12px; right:12px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; pointer-events:none; visibility:hidden; font-variant-numeric:tabular-nums; }
+  .g-timerbar{ position:absolute; top:0; left:0; right:0; height:6px; background:var(--hair); z-index:2; visibility:hidden; }
+  .g-timerbar i{ display:block; height:100%; width:100%; background:var(--pink); border-right:2px solid var(--ink); }
+  .g-hud{ position:absolute; top:14px; left:12px; right:12px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; pointer-events:none; visibility:hidden; font-variant-numeric:tabular-nums; }
   .g-screen{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:16px;
     background:color-mix(in srgb, var(--paper) 86%, transparent); }
   .g-screen[hidden]{ display:none; }
@@ -321,10 +323,11 @@
           <div class="panel" id="p-fun" hidden>
             <div class="game" id="game">
               <canvas id="gcanvas"></canvas>
-              <div class="g-hud" id="g-hud"><span id="g-score">0 coins</span><span id="g-time">12s</span></div>
+              <div class="g-timerbar" id="g-timerbar"><i id="g-bar"></i></div>
+              <div class="g-hud" id="g-hud"><span id="g-score">0 coins</span><span id="g-time">30s</span></div>
               <div class="g-screen" id="g-start">
                 <div class="g-title">🪙 Coin Catch</div>
-                <div class="g-sub">Use&nbsp; ← →&nbsp; to catch coins. Each coin = US$0.10.<br>Your catch becomes the tip.</div>
+                <div class="g-sub">Use&nbsp; ← →&nbsp; to catch coins for 30 seconds. Each coin = US$0.10.<br>Your catch becomes the tip.</div>
                 <button class="g-btn primary" type="button" id="g-play">Start</button>
               </div>
               <div class="g-screen" id="g-result" hidden>
@@ -507,10 +510,12 @@
     var hud=$("#g-hud"), scoreEl=$("#g-score"), timeEl=$("#g-time");
     var startScr=$("#g-start"), resultScr=$("#g-result");
     var resTitle=$("#g-result-title"), resSub=$("#g-result-sub"), useBtn=$("#g-use");
+    var timerBar=$("#g-timerbar"), bar=$("#g-bar");
     var FONT='"Hanken Grotesk",-apple-system,sans-serif';
     var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0;
     var coins=[], score=0, caught=0, running=false, raf=null, startT=0, lastT=0, lastSpawn=0, gained=0;
-    var DUR=12000, COIN=0.10, GOLD=0.30, CAP=5.00;
+    var pop=0, pops=[];  // basket squash + floating "+$" feedback
+    var DUR=30000, COIN=0.10, GOLD=0.30, CAP=5.00;
 
     function size(){
       dpr=Math.min(window.devicePixelRatio||1,2);
@@ -533,8 +538,20 @@
         ctx.fillText(c.gold?"★":"$", c.x, c.y+0.5);
       }
       var bw=jarW, bx=jarX-bw/2, by=jarY, bh=20;
-      rr(bx,by,bw,bh,5); ctx.fillStyle="#ff90e8"; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle="#000"; ctx.stroke();
+      var sx=1+pop*0.16, sy=1-pop*0.16;               // squash on catch
+      ctx.save();
+      ctx.translate(jarX, by+bh); ctx.scale(sx,sy); ctx.translate(-jarX, -(by+bh));
+      rr(bx,by,bw,bh,5); ctx.fillStyle=(pop>0.08 ? "#ffc9f2" : "#ff90e8"); ctx.fill();   // flash lighter on catch
+      ctx.lineWidth=2.5; ctx.strokeStyle="#000"; ctx.stroke();
       ctx.beginPath(); ctx.moveTo(bx-3,by+1); ctx.lineTo(bx+bw+3,by+1); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+      ctx.restore();
+      // floating "+$" feedback rising from the basket
+      for(var j=0;j<pops.length;j++){ var pp=pops[j];
+        ctx.globalAlpha=Math.max(0, Math.min(1, pp.life));
+        ctx.fillStyle=pp.gold?"#c8189e":"#000"; ctx.font="800 13px "+FONT; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(pp.txt, pp.x, pp.y);
+      }
+      ctx.globalAlpha=1;
     }
     function step(t){
       if(!running) return;
@@ -544,26 +561,34 @@
       var ramp=1+(t-startT)/DUR*0.5;
       for(var i=coins.length-1;i>=0;i--){ var c=coins[i]; c.y+=c.vy*dt*ramp;
         if(c.y+c.r>=jarY && c.y-c.r<=jarY+16 && Math.abs(c.x-jarX)<=jarW/2+c.r*0.35){
-          score+=c.gold?GOLD:COIN; caught++; coins.splice(i,1); continue;
+          score+=c.gold?GOLD:COIN; caught++;
+          pop=1; pops.push({ x:jarX, y:jarY-8, txt:(c.gold?"+$0.30":"+$0.10"), gold:c.gold, life:1 });
+          coins.splice(i,1); continue;
         }
         if(c.y-c.r>H) coins.splice(i,1);
       }
+      // decay catch feedback
+      pop=Math.max(0, pop-dt*0.09);
+      for(var k=pops.length-1;k>=0;k--){ pops[k].y-=dt*0.9; pops[k].life-=dt*0.028; if(pops[k].life<=0) pops.splice(k,1); }
       var rem=Math.max(0,DUR-(t-startT));
       timeEl.textContent=Math.ceil(rem/1000)+"s";
+      bar.style.width=(rem/DUR*100)+"%";
       scoreEl.textContent=caught+" coins · "+money(Math.min(score,CAP));
       draw();
       if(rem<=0){ end(); return; }
       raf=requestAnimationFrame(step);
     }
     function play(){
-      startScr.hidden=true; resultScr.hidden=true; hud.style.visibility="visible";
-      size(); coins=[]; score=0; caught=0; jarX=W/2; dir=0; running=true;
+      startScr.hidden=true; resultScr.hidden=true;
+      hud.style.visibility="visible"; timerBar.style.visibility="visible"; bar.style.width="100%";
+      size(); coins=[]; score=0; caught=0; pop=0; pops=[]; jarX=W/2; dir=0; running=true;
       raf=requestAnimationFrame(function(t){ startT=t; lastT=t; lastSpawn=t; step(t); });
     }
     function end(){
       running=false; if(raf) cancelAnimationFrame(raf);
+      timerBar.style.visibility="hidden";
       gained=Math.min(round2(score), CAP);
-      resTitle.textContent = caught>=16?"Coin master! 🤩" : caught>=8?"Nice catch! 🪙" : "Every coin counts 🙂";
+      resTitle.textContent = caught>=30?"Coin master! 🤩" : caught>=15?"Nice catch! 🪙" : "Every coin counts 🙂";
       resSub.textContent="You caught "+caught+" coin"+(caught===1?"":"s")+" — that's "+money(gained);
       useBtn.disabled=false; useBtn.textContent="Use "+money(gained)+" tip";
       hud.style.visibility="hidden"; resultScr.hidden=false;
@@ -585,7 +610,7 @@
       resTitle.textContent="Added to your tip ✓";
     });
     return {
-      enter:function(){ running=false; if(raf)cancelAnimationFrame(raf); hud.style.visibility="hidden"; resultScr.hidden=true; startScr.hidden=false; },
+      enter:function(){ running=false; if(raf)cancelAnimationFrame(raf); hud.style.visibility="hidden"; timerBar.style.visibility="hidden"; resultScr.hidden=true; startScr.hidden=false; },
       stop:function(){ running=false; if(raf)cancelAnimationFrame(raf); }
     };
   })();
