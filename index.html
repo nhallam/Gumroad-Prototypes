@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gumroad · Leave a tip</title>
+<style>
+  /* ============================================================
+     Gumroad — Tipping prototype
+     Faithful rebuild of the "Leave a tip?" sheet (Figma 2030:32)
+     + reconstructed connected states (Custom entry, Thank-you)
+     Neo-brutalist Gumroad style: 1px black borders, flat white
+     cards, hard offset shadows, bold grotesk type.
+     ============================================================ */
+
+  :root {
+    --ink:      #000000;
+    --paper:    #ffffff;
+    --muted:    rgba(0,0,0,.42);
+    --selected: #e5e5e5;
+    --canvas:   #f4f4f0;
+    --accent:   #ff90e8;   /* Gumroad pink — used for focus + success flourish */
+
+    --border: 1.5px solid var(--ink);
+    --radius-frame: 14px;
+    --radius-card: 6px;
+
+    --gap: 12px;
+    --pad: 18px;
+
+    /* motion */
+    --ease-out: cubic-bezier(.2,.8,.24,1);
+    --ease-pop: cubic-bezier(.34,1.56,.64,1);
+    --dur: .22s;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    /* subtle textured backdrop for desktop context */
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(255,144,232,.10), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(0,0,0,.04), transparent 40%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ---------- The sheet / device frame ---------- */
+  .sheet {
+    position: relative;
+    width: 100%;
+    max-width: 422px;
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius-frame);
+    padding: var(--pad);
+    overflow: hidden;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.12);
+    animation: sheet-in .5s var(--ease-out) both;
+  }
+  @keyframes sheet-in {
+    from { opacity: 0; transform: translateY(14px) scale(.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* screens live stacked; only one visible. Height animates via grid trick. */
+  .screens { display: grid; }
+  .screen  { grid-area: 1 / 1; }
+
+  .screen[hidden] { display: none !important; }
+
+  /* ---------- Header ---------- */
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .head h1 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+  .back {
+    font-size: 16px; font-weight: 400;
+    background: none; border: none; cursor: pointer;
+    color: var(--ink); padding: 4px 2px;
+    position: relative;
+  }
+  .back::after {
+    content: ""; position: absolute; left: 2px; right: 2px; bottom: 2px;
+    height: 1.5px; background: var(--ink);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .back:hover::after, .back:focus-visible::after { transform: scaleX(1); }
+
+  /* ---------- Tip grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    margin-bottom: var(--gap);
+  }
+
+  /* Shared card/button chrome (Gumroad hard-shadow) */
+  .tip, .wide, .pay {
+    font-family: inherit;
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition:
+      transform var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out),
+      background-color var(--dur) var(--ease-out);
+    box-shadow: 0 0 0 rgba(0,0,0,1);
+  }
+
+  .tip { height: 79px; gap: 3px; }
+  .tip .amt   { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+  .tip .sub   { font-size: 15px; font-weight: 400; color: var(--muted); transition: color var(--dur); }
+  .tip .single{ font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+
+  /* hover: lift with hard shadow */
+  .tip:hover, .wide:hover {
+    transform: translate(-2px,-2px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  /* active press: collapse shadow */
+  .tip:active, .wide:active, .pay:active {
+    transform: translate(1px,1px);
+    box-shadow: 1px 1px 0 var(--ink);
+    transition-duration: .05s;
+  }
+
+  /* selected state — faithful to mock: gray fill + hard black offset shadow */
+  .tip.is-selected, .wide.is-selected {
+    background: var(--selected);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-1px,-1px);
+    animation: pop .28s var(--ease-pop);
+  }
+  .tip.is-selected .sub { color: rgba(0,0,0,.55); }
+  @keyframes pop {
+    0%   { transform: translate(-1px,-1px) scale(1); }
+    45%  { transform: translate(-1px,-1px) scale(1.035); }
+    100% { transform: translate(-1px,-1px) scale(1); }
+  }
+
+  /* keyboard focus ring — Gumroad pink */
+  .tip:focus-visible, .wide:focus-visible, .pay:focus-visible, .back:focus-visible,
+  #custom-input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Custom amount input (revealed) ---------- */
+  .custom-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows .28s var(--ease-out), opacity .28s var(--ease-out), margin .28s var(--ease-out);
+    margin-bottom: 0;
+  }
+  .custom-wrap.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-bottom: var(--gap);
+  }
+  .custom-wrap > .inner { overflow: hidden; min-height: 0; }
+  .field {
+    display: flex; align-items: center;
+    border: var(--border); border-radius: var(--radius-card);
+    height: 49px; padding: 0 14px; gap: 6px;
+    background: var(--paper);
+  }
+  .field .cur { font-size: 16px; font-weight: 700; color: var(--muted); }
+  #custom-input {
+    flex: 1; border: none; outline: none; background: none;
+    font-family: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
+    min-width: 0;
+  }
+  #custom-input::placeholder { color: var(--muted); font-weight: 400; }
+
+  /* ---------- Wide "No tip" ---------- */
+  .wide {
+    width: 100%; height: 49px;
+    font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+    margin-bottom: 22px;
+  }
+
+  /* ---------- Total ---------- */
+  .total {
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-size: 17px; font-weight: 700; letter-spacing: -.01em;
+    margin-bottom: 16px;
+  }
+  .total .val { font-variant-numeric: tabular-nums; }
+
+  hr.rule { border: none; border-top: var(--border); margin: 0 calc(-1 * var(--pad)) 16px; }
+
+  /* ---------- Pay button ---------- */
+  .pay {
+    width: 100%; height: 50px;
+    background: var(--ink); color: var(--paper);
+    font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+    border-radius: var(--radius-card);
+    box-shadow: 3px 3px 0 rgba(0,0,0,.28);
+  }
+  .pay:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--accent); }
+  .pay .spinner {
+    width: 17px; height: 17px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+    animation: spin .6s linear infinite; display: none;
+  }
+  .pay.is-loading .label { display: none; }
+  .pay.is-loading .spinner { display: block; }
+  .pay.is-loading { transform: none; box-shadow: 3px 3px 0 rgba(0,0,0,.28); cursor: default; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============================================================
+     Success / thank-you screen
+     ============================================================ */
+  .success { text-align: center; padding: 26px 6px 12px; }
+  .check {
+    width: 78px; height: 78px; margin: 4px auto 20px;
+    border-radius: 50%;
+    border: var(--border);
+    display: grid; place-items: center;
+    background: var(--accent);
+    box-shadow: 3px 3px 0 var(--ink);
+    animation: badge-in .5s var(--ease-pop) both;
+  }
+  @keyframes badge-in {
+    0% { transform: scale(0) rotate(-25deg); opacity: 0; }
+    100%{ transform: none; opacity: 1; }
+  }
+  .check svg { width: 42px; height: 42px; }
+  .check path {
+    stroke: var(--ink); stroke-width: 5; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 48; stroke-dashoffset: 48;
+    animation: draw .4s var(--ease-out) .35s forwards;
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .success h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+  .success p  { font-size: 15px; color: var(--muted); margin-bottom: 4px; line-height: 1.45; }
+  .success .paid {
+    font-size: 15px; font-weight: 700; margin: 18px 0 22px;
+    display: inline-flex; gap: 8px; align-items: baseline;
+  }
+  .success .receipt {
+    border: var(--border); border-radius: var(--radius-card);
+    padding: 14px 16px; margin: 0 0 22px; text-align: left;
+    display: grid; gap: 8px;
+    animation: sheet-in .5s var(--ease-out) .15s both;
+  }
+  .receipt .row { display: flex; justify-content: space-between; font-size: 15px; }
+  .receipt .row .k { color: var(--muted); }
+  .receipt .row .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .receipt .row.tot { border-top: 1px dashed rgba(0,0,0,.25); padding-top: 8px; }
+
+  /* stagger entrance of success content */
+  .success h2      { animation: rise .45s var(--ease-out) .18s both; }
+  .success .lead   { animation: rise .45s var(--ease-out) .26s both; }
+  .success .paid   { animation: rise .45s var(--ease-out) .34s both; }
+  .success .again  { animation: rise .45s var(--ease-out) .5s both; }
+  @keyframes rise { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
+
+  .again {
+    background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 15px; font-weight: 700; color: var(--ink);
+    text-decoration: underline; text-underline-offset: 3px;
+    padding: 6px;
+  }
+
+  /* confetti */
+  .confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .confetti i {
+    position: absolute; top: -12px; width: 8px; height: 12px; opacity: 0;
+    animation: fall 1.5s var(--ease-out) forwards;
+  }
+  @keyframes fall {
+    0%   { opacity: 1; transform: translateY(-10px) rotate(0); }
+    100% { opacity: 0; transform: translateY(520px) rotate(540deg); }
+  }
+
+  /* ---------- Screen transitions ---------- */
+  .enter-right { animation: enter-right .34s var(--ease-out) both; }
+  .exit-left   { animation: exit-left  .28s var(--ease-out) both; }
+  @keyframes enter-right { from { opacity:0; transform: translateX(28px);} to { opacity:1; transform:none; } }
+  @keyframes exit-left   { from { opacity:1; transform:none;} to { opacity:0; transform: translateX(-28px);} }
+
+  /* ---------- Mobile: bottom-anchored sheet ---------- */
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: end; }
+    .sheet {
+      max-width: none; width: 100%;
+      border-left: none; border-right: none; border-bottom: none;
+      border-radius: 22px 22px 0 0;
+      box-shadow: 0 -10px 40px rgba(0,0,0,.14);
+      padding: 26px 18px calc(20px + env(safe-area-inset-bottom));
+      animation: sheet-up .42s var(--ease-out) both;
+    }
+    .sheet::before {  /* grab handle */
+      content: ""; position: absolute; top: 9px; left: 50%;
+      transform: translateX(-50%);
+      width: 40px; height: 4px; border-radius: 2px; background: rgba(0,0,0,.18);
+    }
+    hr.rule { margin-left: -18px; margin-right: -18px; }
+  }
+  @keyframes sheet-up {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+  }
+</style>
+</head>
+<body>
+  <main class="sheet" role="dialog" aria-label="Leave a tip">
+    <div class="screens">
+
+      <!-- ============ SCREEN 1 · Tip selection ============ -->
+      <section id="screen-tip" class="screen" aria-labelledby="tip-title">
+        <div class="head">
+          <h1 id="tip-title">Leave a tip?</h1>
+          <button class="back" type="button" id="btn-back">Back</button>
+        </div>
+
+        <div class="grid" role="radiogroup" aria-label="Tip amount">
+          <!-- percent options are generated by JS to keep amounts in sync -->
+        </div>
+
+        <!-- Custom amount, revealed when "Custom" is chosen -->
+        <div class="custom-wrap" id="custom-wrap">
+          <div class="inner">
+            <label class="field" for="custom-input">
+              <span class="cur">US$</span>
+              <input id="custom-input" inputmode="decimal" autocomplete="off"
+                     placeholder="Enter a custom amount" aria-label="Custom tip amount">
+            </label>
+          </div>
+        </div>
+
+        <button class="wide" type="button" id="btn-notip" role="radio" aria-checked="false">No tip</button>
+
+        <div class="total">
+          <span>Total</span>
+          <span class="val" id="total-val">US$0.00</span>
+        </div>
+
+        <hr class="rule">
+
+        <button class="pay" type="button" id="btn-pay">
+          <span class="label">Pay</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </section>
+
+      <!-- ============ SCREEN 2 · Thank you ============ -->
+      <section id="screen-success" class="screen" hidden aria-labelledby="ty-title">
+        <div class="head">
+          <h1 id="ty-title">Payment</h1>
+          <button class="back" type="button" id="btn-back-2">Done</button>
+        </div>
+        <div class="success">
+          <div class="check" aria-hidden="true">
+            <svg viewBox="0 0 52 52"><path d="M14 27 l8 8 l16 -18"/></svg>
+          </div>
+          <h2>Thank you!</h2>
+          <p class="lead">Your payment went through.<br>We appreciate the extra support. 💛</p>
+
+          <div class="receipt" aria-label="Receipt">
+            <div class="row"><span class="k">Subtotal</span><span class="v" id="r-sub">US$0.00</span></div>
+            <div class="row"><span class="k" id="r-tip-k">Tip</span><span class="v" id="r-tip">US$0.00</span></div>
+            <div class="row tot"><span class="k">Total paid</span><span class="v" id="r-total">US$0.00</span></div>
+          </div>
+
+          <button class="again" type="button" id="btn-again">Leave another tip</button>
+        </div>
+        <div class="confetti" id="confetti" aria-hidden="true"></div>
+      </section>
+
+    </div>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  // --- Model ------------------------------------------------------------
+  // Derived from the Figma mock: with 25% selected the Total reads US$92.92,
+  // so subtotal = 92.92 − 18.58 = 74.34. Preset tip amounts are taken
+  // verbatim from the design (US$14.86 / 18.58 / 22.30).
+  var SUBTOTAL = 74.34;
+  var OPTIONS = [
+    { id: "20", label: "20%", amount: 14.86 },
+    { id: "25", label: "25%", amount: 18.58 },
+    { id: "30", label: "30%", amount: 22.30 },
+    { id: "custom", label: "Custom", amount: null, custom: true }
+  ];
+  var DEFAULT_ID = "25"; // mock shows 25% pre-selected
+
+  var state = { selected: DEFAULT_ID, customAmount: 0 };
+
+  // --- Helpers ----------------------------------------------------------
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function money(n) { return "US$" + (Math.round(n * 100) / 100).toFixed(2); }
+
+  function currentTip() {
+    if (state.selected === "notip") return 0;
+    if (state.selected === "custom") return state.customAmount || 0;
+    var o = OPTIONS.find(function (x) { return x.id === state.selected; });
+    return o ? o.amount : 0;
+  }
+  function currentTotal() { return SUBTOTAL + currentTip(); }
+
+  // --- Build the tip grid ----------------------------------------------
+  var grid = $(".grid");
+  OPTIONS.forEach(function (o) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "tip";
+    b.dataset.id = o.id;
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", "false");
+    if (o.custom) {
+      b.innerHTML = '<span class="single">Custom</span>';
+      b.setAttribute("aria-label", "Custom tip amount");
+    } else {
+      b.innerHTML = '<span class="amt">' + o.label + '</span>' +
+                    '<span class="sub">' + money(o.amount) + '</span>';
+      b.setAttribute("aria-label", o.label + " tip, " + money(o.amount));
+    }
+    b.addEventListener("click", function () { select(o.id); });
+    grid.appendChild(b);
+  });
+
+  var notipBtn   = $("#btn-notip");
+  var customWrap = $("#custom-wrap");
+  var customInput= $("#custom-input");
+  var totalVal   = $("#total-val");
+
+  // --- Total roll animation --------------------------------------------
+  var rollFrom = 0, rollRAF = null;
+  function renderTotal(animate) {
+    var to = currentTotal();
+    if (!animate) { totalVal.textContent = money(to); rollFrom = to; return; }
+    if (rollRAF) cancelAnimationFrame(rollRAF);
+    var from = rollFrom, start = null, dur = 320;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      totalVal.textContent = money(from + (to - from) * eased);
+      if (p < 1) { rollRAF = requestAnimationFrame(step); }
+      else { rollFrom = to; }
+    }
+    rollRAF = requestAnimationFrame(step);
+  }
+
+  // --- Selection --------------------------------------------------------
+  function select(id, animate) {
+    if (animate === undefined) animate = true;
+    state.selected = id;
+
+    // visual state across all radio-like controls
+    Array.prototype.forEach.call(grid.querySelectorAll(".tip"), function (el) {
+      var on = el.dataset.id === id;
+      el.classList.toggle("is-selected", on);
+      el.setAttribute("aria-checked", on ? "true" : "false");
+    });
+    var notipOn = id === "notip";
+    notipBtn.classList.toggle("is-selected", notipOn);
+    notipBtn.setAttribute("aria-checked", notipOn ? "true" : "false");
+
+    // custom field reveal
+    var openCustom = id === "custom";
+    customWrap.classList.toggle("open", openCustom);
+    if (openCustom) { setTimeout(function () { customInput.focus(); }, 180); }
+
+    renderTotal(animate);
+  }
+
+  notipBtn.addEventListener("click", function () { select("notip"); });
+
+  customInput.addEventListener("input", function () {
+    var raw = customInput.value.replace(/[^0-9.]/g, "");
+    var parts = raw.split(".");
+    if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+    if (customInput.value !== raw) customInput.value = raw;
+    state.customAmount = parseFloat(raw) || 0;
+    renderTotal(true);
+  });
+
+  // --- Screen transitions ----------------------------------------------
+  var screenTip = $("#screen-tip");
+  var screenOk  = $("#screen-success");
+
+  function show(next, prev, dir) {
+    prev.classList.remove("enter-right");
+    prev.classList.add("exit-left");
+    var done = function () {
+      prev.hidden = true;
+      prev.classList.remove("exit-left");
+      next.hidden = false;
+      next.classList.remove("exit-left");
+      next.classList.add("enter-right");
+      prev.removeEventListener("animationend", done);
+    };
+    prev.addEventListener("animationend", done);
+    // fallback if animations are disabled
+    setTimeout(function () { if (!prev.hidden) done(); }, 400);
+  }
+
+  // --- Pay --------------------------------------------------------------
+  var payBtn = $("#btn-pay");
+  payBtn.addEventListener("click", function () {
+    if (payBtn.classList.contains("is-loading")) return;
+    payBtn.classList.add("is-loading");
+    setTimeout(function () {
+      payBtn.classList.remove("is-loading");
+      fillReceipt();
+      show(screenOk, screenTip);
+      launchConfetti();
+    }, 900);
+  });
+
+  function fillReceipt() {
+    $("#r-sub").textContent   = money(SUBTOTAL);
+    var tip = currentTip();
+    $("#r-tip-k").textContent = tip > 0
+      ? "Tip" + (state.selected !== "custom" && state.selected !== "notip"
+          ? " (" + (OPTIONS.find(function (o){return o.id===state.selected;})||{}).label + ")"
+          : "")
+      : "Tip";
+    $("#r-tip").textContent   = money(tip);
+    $("#r-total").textContent = money(currentTotal());
+  }
+
+  // --- Confetti (Gumroad pink + black) ---------------------------------
+  function launchConfetti() {
+    var host = $("#confetti");
+    host.innerHTML = "";
+    var colors = ["#ff90e8", "#000000", "#ffffff", "#ff90e8"];
+    for (var i = 0; i < 26; i++) {
+      var p = document.createElement("i");
+      p.style.left = (Math.random() * 100) + "%";
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random() * 0.25) + "s";
+      p.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+      if (i % 3 === 0) p.style.borderRadius = "50%";
+      p.style.border = "1px solid rgba(0,0,0,.25)";
+      host.appendChild(p);
+    }
+  }
+
+  // --- Back / Done / Again ---------------------------------------------
+  $("#btn-back").addEventListener("click", function () {
+    // In a real flow this returns to checkout; here we nudge.
+    payBtn.animate(
+      [{ transform: "translateX(0)" }, { transform: "translateX(-6px)" },
+       { transform: "translateX(6px)" }, { transform: "translateX(0)" }],
+      { duration: 260, easing: "ease-in-out" });
+  });
+  function backToTip() {
+    customInput.value = ""; state.customAmount = 0;
+    select(DEFAULT_ID, false);
+    show(screenTip, screenOk);
+  }
+  $("#btn-back-2").addEventListener("click", backToTip);
+  $("#btn-again").addEventListener("click", backToTip);
+
+  // --- Init -------------------------------------------------------------
+  select(DEFAULT_ID, false);   // no roll on first paint — show US$92.92 immediately
+})();
+</script>
+</body>
+</html>
