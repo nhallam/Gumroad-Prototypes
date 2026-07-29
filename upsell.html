@@ -104,29 +104,29 @@
   .tip-panel, .done-panel{ animation:slidein .3s var(--ease-out); }
   @keyframes slidein{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none; } }
 
-  .tip-panel{ background:var(--pink); color:#000; border:var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm) var(--ink); }
-  .tip-panel .tp-back{ background:none; border:none; cursor:pointer; font-size:13px; font-weight:700; color:#000; opacity:.7; padding:0 0 8px; }
+  .tip-panel{ background:var(--paper); color:var(--ink); border:var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm) var(--ink); }
+  .tip-panel .tp-back{ background:none; border:none; cursor:pointer; font-size:13px; font-weight:700; color:var(--ink); opacity:.6; padding:0 0 8px; }
   .tip-panel .tp-back:hover{ opacity:1; text-decoration:underline; }
   .tip-panel h2{ font-size:21px; font-weight:800; letter-spacing:-.02em; }
-  .tip-panel p{ font-size:13.5px; margin-top:7px; line-height:1.5; }
+  .tip-panel p{ font-size:13.5px; margin-top:7px; line-height:1.5; color:var(--muted); }
   .modeseg{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
-  .mode{ border:var(--border); border-radius:var(--radius-sm); background:#fff; color:#000; padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer;
-    transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s; }
-  .mode:hover{ transform:translate(-2px,-2px); box-shadow:4px 4px 0 #000; }
+  .mode{ border:var(--border); border-radius:var(--radius-sm); background:var(--pink); color:#000; padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer;
+    transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s, color .12s; }
+  .mode:hover{ transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--ink); }
   .mode:active{ transform:none; box-shadow:none; }
-  .mode.on{ background:#000; color:#fff; }
+  .mode.on{ background:var(--ink); color:var(--paper); }
   .tips{ display:flex; flex-direction:column; gap:9px; margin-top:9px; }
-  .tipbtn{ border:var(--border); border-radius:var(--radius-sm); background:#fff; color:#000; padding:13px; font-weight:700; font-size:15px; cursor:pointer; text-align:center;
-    transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s; }
-  .tipbtn .sub{ font-weight:400; color:rgba(0,0,0,.5); font-size:13px; }
-  .tipbtn:hover{ transform:translate(-3px,-3px); box-shadow:5px 5px 0 #000; }
+  .tipbtn{ border:var(--border); border-radius:var(--radius-sm); background:var(--pink); color:#000; padding:13px; font-weight:700; font-size:15px; cursor:pointer; text-align:center;
+    transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out), background-color .12s, color .12s; }
+  .tipbtn .sub{ font-weight:400; color:rgba(0,0,0,.55); font-size:13px; }
+  .tipbtn:hover{ transform:translate(-3px,-3px); box-shadow:5px 5px 0 var(--ink); }
   .tipbtn:active{ transform:none; box-shadow:none; transition-duration:.04s; }
-  .tipbtn.on{ background:#000; color:#fff; } .tipbtn.on .sub{ color:rgba(255,255,255,.6); }
-  .tp-total{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; font-size:17px; margin-top:16px; padding-top:13px; border-top:1px solid rgba(0,0,0,.32); }
+  .tipbtn.on{ background:var(--ink); color:var(--paper); } .tipbtn.on .sub{ color:var(--paper); opacity:.6; }
+  .tp-total{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; font-size:17px; margin-top:16px; padding-top:13px; border-top:1px solid var(--hair); }
   .tp-total .val{ font-variant-numeric:tabular-nums; }
-  .tp-pay{ width:100%; height:50px; margin-top:14px; background:#000; color:#fff; border:var(--border); border-radius:var(--radius-sm); font-size:16px; font-weight:700; cursor:pointer;
+  .tp-pay{ width:100%; height:50px; margin-top:14px; background:var(--ink); color:var(--paper); border:var(--border); border-radius:var(--radius-sm); font-size:16px; font-weight:700; cursor:pointer;
     transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out); }
-  .tp-pay:hover{ transform:translate(-4px,-4px); box-shadow:6px 6px 0 #000; }
+  .tp-pay:hover{ transform:translate(-4px,-4px); box-shadow:6px 6px 0 var(--ink); }
   .tp-pay:active{ transform:none; box-shadow:none; transition-duration:.04s; }
 
   /* success */
