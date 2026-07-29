@@ -271,7 +271,10 @@
   .avatars .avatar:nth-child(1) { z-index: 3; }
   .avatars .avatar:nth-child(2) { z-index: 2; }
   .avatars .avatar:nth-child(3) { z-index: 1; }
-  .avatar svg { width: 100%; height: 100%; display: block; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .avatar svg { width: 100%; height: 100%; display: none; }        /* fallback */
+  .avatar.noimg img { display: none; }
+  .avatar.noimg svg { display: block; }
   .social-copy { font-size: 14px; font-weight: 600; color: var(--muted); }
 
   /* ---------- Total ---------- */
@@ -452,12 +455,15 @@
         <div class="social">
           <div class="avatars" aria-hidden="true">
             <span class="avatar">
+              <img class="ph" alt="" loading="lazy" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces&auto=format&q=70">
               <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#90a8ed"/><path d="M16 100C16 74 82 74 84 100Z" fill="#f4f4f0"/><circle cx="50" cy="45" r="18" fill="#f3c9a6"/><path d="M31 48C31 23 69 23 69 48c0-15-8-20-19-20s-19 5-19 20Z" fill="#3b2417"/></svg>
             </span>
             <span class="avatar">
+              <img class="ph" alt="" loading="lazy" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=faces&auto=format&q=70">
               <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#ffc900"/><path d="M16 100C16 74 82 74 84 100Z" fill="#23a094"/><circle cx="50" cy="45" r="18" fill="#8d5a3c"/><path d="M30 46c0-26 40-26 40 0 2-9 0-24-20-24S28 37 30 46Z" fill="#140d06"/></svg>
             </span>
             <span class="avatar">
+              <img class="ph" alt="" loading="lazy" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=faces&auto=format&q=70">
               <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#23a094"/><path d="M16 100C16 74 82 74 84 100Z" fill="#ff90e8"/><circle cx="50" cy="45" r="18" fill="#e8b98f"/><path d="M30 50C28 25 72 25 70 50c4-8 6-28-20-28S26 42 30 50Z" fill="#6b3a1a"/></svg>
             </span>
           </div>
@@ -510,6 +516,15 @@
 <script>
 (function () {
   "use strict";
+
+  // Real photos with graceful fallback to the illustrated avatars
+  // (works on the live site; the artifact's CSP blocks externals -> fallback).
+  document.querySelectorAll(".avatar img").forEach(function (img) {
+    function fail(){ var a = img.parentNode; if (a && a.classList) a.classList.add("noimg"); }
+    img.addEventListener("error", fail);
+    if (img.complete && img.naturalWidth === 0) fail();
+    setTimeout(function(){ if (!img.complete || img.naturalWidth === 0) fail(); }, 3000);
+  });
 
   // --- Model ------------------------------------------------------------
   // Derived from the Figma mock: with 25% selected the Total reads US$92.92,

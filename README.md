@@ -35,7 +35,8 @@ type), made fully interactive and responsive for **desktop and mobile web**.
 1. **Leave a tip?** — the screen from the Figma frame:
    - 2×2 grid: `20% · US$14.86`, `25% · US$18.58` (pre-selected), `30% · US$22.30`, `Custom`
    - full-width **No tip**
-   - social proof: three overlapping avatars + "12 other people left tips"
+   - social proof: three overlapping avatars (real Unsplash photos, with an
+     illustrated-SVG fallback where external images are blocked) + "12 other people left tips"
    - live **Total** (default `US$92.92`, with the tip amount shown beside it)
      and a black **Pay** button
 2. **Custom amount** — choosing *Custom* reveals an inline amount field; the Total
