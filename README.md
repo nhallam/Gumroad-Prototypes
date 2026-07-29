@@ -2,7 +2,18 @@
 
 An animated HTML/CSS/JS prototype of Gumroad's **"Leave a tip?"** checkout step,
 rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
-Single self-contained file — open `index.html` in any browser, no build step.
+
+### Files
+
+| File | What it is |
+|---|---|
+| `index.html` | **The page** — titled "Gumroad Tipping Prototype"; embeds the prototype and is where more prototypes stack below. |
+| `tip.html` | **The prototype** — the self-contained "Leave a tip?" flow (also opens standalone). |
+
+`index.html` embeds `tip.html` in an `<iframe>`, so **serve the folder** to view the
+page (e.g. `python3 -m http.server`, then open `/`). Opening `tip.html` directly
+in a browser works with no server. To add another prototype, drop a new
+`<section class="section">` into `index.html` above the "More coming soon" slot.
 
 ## What it is
 
