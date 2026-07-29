@@ -44,6 +44,7 @@
 
     /* Gumroad hard shadow offsets: 0.25rem / 0.5rem, no blur */
     --shadow-sm: 4px 4px 0;
+    --shadow-hover: 6px 6px 0;   /* rollover lift (matches gumroad.com nav) */
     --shadow-lg: 8px 8px 0;
 
     /* motion */
@@ -184,16 +185,16 @@
   .tip .sub   { font-size: 15px; font-weight: 400; color: var(--muted); transition: color var(--dur); }
   .tip .single{ font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
 
-  /* hover: lift with hard shadow */
+  /* rollover: lift up-left, hard black shadow appears bottom-right */
   .tip:hover, .wide:hover {
-    transform: translate(-2px,-2px);
-    box-shadow: var(--shadow-sm) var(--ink);
+    transform: translate(-4px,-4px);
+    box-shadow: var(--shadow-hover) var(--ink);
   }
-  /* active press: collapse shadow */
+  /* click: drop back down, shadow collapses (pressed into the page) */
   .tip:active, .wide:active, .pay:active {
-    transform: translate(1px,1px);
-    box-shadow: 1px 1px 0 var(--ink);
-    transition-duration: .05s;
+    transform: translate(0,0);
+    box-shadow: none;
+    transition-duration: .04s;
   }
 
   /* selected state — Gumroad pink: pink wash + pink hard offset shadow */
@@ -204,7 +205,8 @@
     animation: pop .28s var(--ease-pop);
   }
   .tip.is-selected:hover, .wide.is-selected:hover {
-    box-shadow: var(--shadow-lg) var(--accent);
+    transform: translate(-4px,-4px);
+    box-shadow: var(--shadow-hover) var(--accent);
   }
   .tip.is-selected .sub { color: var(--accent-ink); }
   @keyframes pop {
@@ -271,9 +273,20 @@
     background: var(--ink); color: var(--paper);
     font-size: 16px; font-weight: 700; letter-spacing: -.01em;
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-sm) var(--accent);
+    box-shadow: none;   /* flat at rest, like gumroad.com "Start selling" */
   }
-  .pay:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg) var(--accent); }
+  /* rollover: filled/dark CTA turns pink (black text) and lifts */
+  .pay:hover {
+    background: var(--accent); color: #000;
+    transform: translate(-4px,-4px);
+    box-shadow: var(--shadow-hover) var(--ink);
+  }
+  /* press wins over hover (defined after) — collapse the lift */
+  .pay:active {
+    transform: translate(0,0);
+    box-shadow: none;
+    transition-duration: .04s;
+  }
   .pay .spinner {
     width: 17px; height: 17px; border-radius: 50%;
     border: 2px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor;
@@ -281,7 +294,7 @@
   }
   .pay.is-loading .label { display: none; }
   .pay.is-loading .spinner { display: block; }
-  .pay.is-loading { transform: none; box-shadow: var(--shadow-sm) var(--accent); cursor: default; }
+  .pay.is-loading { transform: none; box-shadow: none; background: var(--ink); color: var(--paper); cursor: default; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ============================================================
