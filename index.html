@@ -154,7 +154,7 @@
     box-shadow: none; margin: 0; display: flex; flex-direction: column;
   }
   .figure.is-full .figure__frame { flex: 1; }
-  .figure.is-full .figure__frame iframe { height: 100%; }
+  .figure.is-full .figure__frame iframe { height: 100% !important; }
   body.locked { overflow: hidden; }
 
   /* ---------- Placeholder for future sections ---------- */
@@ -360,6 +360,56 @@
 (function () {
   "use strict";
 
+  // ---- Auto-size each embedded prototype to its content, so the demo areas
+  //      never scroll internally (the page scrolls instead). ----
+  function fit(f) {
+    var fig = f.closest(".figure");
+    if (fig && fig.classList.contains("is-full")) return; // fullscreen fills via CSS
+    var doc;
+    try { doc = f.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.body) return;
+    // Measure the prototype's content container directly. Its intrinsic height
+    // is content-driven and independent of the frame height, so this never
+    // fights the body's `min-height:100dvh` and can't feed back into a loop.
+    var box = doc.querySelector(".wrap, .page, .sheet");
+    var h;
+    if (box) {
+      var bcs = getComputedStyle(doc.body);
+      var mcs = getComputedStyle(box);
+      var pad = (parseFloat(bcs.paddingTop) || 0) + (parseFloat(bcs.paddingBottom) || 0);
+      var mar = (parseFloat(mcs.marginTop) || 0) + (parseFloat(mcs.marginBottom) || 0);
+      h = box.getBoundingClientRect().height + pad + mar;
+    } else {
+      h = doc.documentElement.scrollHeight;
+    }
+    f.style.height = Math.ceil(h) + "px";
+  }
+  function fitAll() { document.querySelectorAll(".figure__frame iframe").forEach(fit); }
+
+  var ro = ("ResizeObserver" in window) ? new ResizeObserver(function (entries) {
+    entries.forEach(function (en) {
+      var f = en.target.__frame;
+      if (f) fit(f);
+    });
+  }) : null;
+
+  function watch(f) {
+    var doc;
+    try { doc = f.contentDocument; } catch (e) { return; }
+    if (!doc) return;
+    fit(f);
+    // Re-fit as fonts/layout settle.
+    setTimeout(function () { fit(f); }, 200);
+    setTimeout(function () { fit(f); }, 700);
+    // Observe the content container (height is content-driven and independent
+    // of the frame height, so resizing the frame can't feed back into a loop).
+    if (ro) {
+      var box = doc.querySelector(".wrap, .page, .sheet") || doc.body;
+      box.__frame = f;
+      try { ro.observe(box); } catch (e) {}
+    }
+  }
+
   // Fullscreen toggle for any figure
   document.querySelectorAll("[data-fs]").forEach(function (btn) {
     var fig = document.getElementById(btn.getAttribute("data-fs"));
@@ -367,6 +417,7 @@
       var on = fig.classList.toggle("is-full");
       document.body.classList.toggle("locked", on);
       btn.textContent = on ? "Close" : "Fullscreen";
+      if (!on) { var f = fig.querySelector("iframe"); if (f) setTimeout(function () { fit(f); }, 0); }
     });
   });
   document.addEventListener("keydown", function (e) {
@@ -374,10 +425,18 @@
       document.querySelectorAll(".figure.is-full").forEach(function (fig) {
         fig.classList.remove("is-full");
         var b = fig.querySelector("[data-fs]"); if (b) b.textContent = "Fullscreen";
+        var f = fig.querySelector("iframe"); if (f) setTimeout(function () { fit(f); }, 0);
       });
       document.body.classList.remove("locked");
     }
   });
+
+  document.querySelectorAll(".figure__frame iframe").forEach(function (f) {
+    if (f.contentDocument && f.contentDocument.readyState === "complete") watch(f);
+    f.addEventListener("load", function () { watch(f); });
+  });
+  var rt;
+  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(fitAll, 120); });
 
   // ---- Theme: page-wide dark-mode switch + keep embedded prototypes in sync ----
   var root = document.documentElement;
