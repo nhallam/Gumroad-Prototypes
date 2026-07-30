@@ -33,6 +33,9 @@
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:18px; margin-bottom:24px; border-bottom:var(--border); }
   .topbar h1{ font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .topbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .btn-fill{ background:var(--pink); color:#000; }
+  .btn-fill:hover{ background:var(--pink); }
 
   .layout{ display:grid; grid-template-columns:minmax(0,1fr) 396px; gap:24px; align-items:start; }
   @media (max-width:920px){ .layout{ grid-template-columns:1fr; } }
@@ -173,7 +176,7 @@
 </head>
 <body>
   <div class="page" id="page">
-    <div class="topbar"><h1>Checkout</h1><button class="btn" type="button">Continue shopping</button></div>
+    <div class="topbar"><h1>Checkout</h1><div class="topbar-actions"><button class="btn btn-fill" type="button" id="autofill">⚡ Autofill</button><button class="btn" type="button">Continue shopping</button></div></div>
 
     <div class="layout" id="layout">
       <!-- LEFT: order summary + recommendations -->
@@ -375,6 +378,23 @@
     if(!$("#disc").value.trim()) return;
     var b=this; b.textContent="Applied ✓"; b.disabled=true;
     setTimeout(function(){ b.textContent="Apply"; b.disabled=false; },1500);
+  });
+
+  // demo helper: autofill the checkout to move through the flow quickly
+  $("#autofill").addEventListener("click",function(){
+    function set(sel,val){ var el=$(sel); if(el){ el.value=val; el.dispatchEvent(new Event("input",{bubbles:true})); } }
+    function byPlaceholder(ph,val){ var el=document.querySelector('input[placeholder="'+ph+'"]'); if(el){ el.value=val; el.dispatchEvent(new Event("input",{bubbles:true})); } }
+    set("#email","alex@example.com");
+    set("#cname","Alex Rivera");
+    set(".cnum","4242 4242 4242 4242");
+    set(".cexp","04 / 27");
+    set(".ccvc","123");
+    byPlaceholder("Full name","Alex Rivera");
+    byPlaceholder("Street address","410 Townsend St, Suite 300");
+    byPlaceholder("City","San Francisco");
+    byPlaceholder("ZIP code","94107");
+    var b=this; b.textContent="✓ Filled";
+    setTimeout(function(){ b.textContent="⚡ Autofill"; },1400);
   });
 
   // pay -> success
