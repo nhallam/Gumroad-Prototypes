@@ -14,6 +14,7 @@ rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
 | `thankyou.html` | **Concept 04** — the thank-you moment: tip on the post-purchase download page (also opens standalone). |
 | `backcreator.html` | **Concept 05** — back the creator: goal progress, supporters and a perk (also opens standalone). |
 | `slider.html` | **Concept 06** — one fair-price slider that merges price and tip (also opens standalone). |
+| `final.html` | **Concept 07** — the complete Gumroad checkout with the tip built in (also opens standalone). |
 
 **Concept 02 — checkout tipping.** A tip module embedded in the order summary with a
 type switcher: **Percentage** (preset grid), **Custom** ($ input with "N people left a
@@ -47,6 +48,16 @@ supporter ("You're supporter #37").
 pay US$3" marker and preset chips (Base only / Fair / Generous / Champion). The creator's
 avatar reacts as you drag (🙂 → 😊 → 😍 → 🤩) and the breakdown shows "Base + US$X tip"
 live. Fully keyboard-accessible (native range input).
+
+**Concept 07 — the complete checkout.** The flagship, polished version: a realistic
+Gumroad checkout with a full cart (three real products, quantities and variants,
+per-item *Configure / Remove*), subtotal + shipping + discount code, a **"Customers who
+bought these items also bought"** recommendation grid with pink price flags, and a
+complete payment column (email, card, full shipping address). The **"Leave a tip?"**
+panel is built into the bottom of the payment column — 20 / 25 / 30 % (each showing its
+US$ amount) + Custom, with a **Remove tip** link; the order Total and the payment Total
+update live, and removing a cart item recomputes everything. **Pay** completes to an
+animated receipt.
 
 `index.html` embeds the prototypes in `<iframe>`s, so **serve the folder** to view the
 page (e.g. `python3 -m http.server`, then open `/`). Opening `tip.html` directly
