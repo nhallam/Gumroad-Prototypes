@@ -28,8 +28,11 @@
   input,select,button{ font-family:inherit; }
   a{ color:inherit; }
   .page{ max-width:1060px; margin:0 auto; padding:22px 22px 44px; }
-  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
   .topbar h1{ font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .topbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .btn-fill{ background:var(--pink); color:#000; }
+  .btn-fill:hover{ background:var(--pink); }
 
   .btn{ font-size:14px; font-weight:700; color:var(--ink); background:var(--paper); border:var(--border); border-radius:var(--radius-sm); padding:9px 15px; cursor:pointer;
     transition:transform .15s var(--ease-out), box-shadow .15s var(--ease-out); }
@@ -148,7 +151,7 @@
 </head>
 <body>
   <div class="page">
-    <div class="topbar"><h1>Checkout</h1><button class="btn" type="button">Continue shopping</button></div>
+    <div class="topbar"><h1>Checkout</h1><div class="topbar-actions"><button class="btn btn-fill" type="button" id="autofill">⚡ Autofill</button><button class="btn" type="button">Continue shopping</button></div></div>
 
     <div class="cols">
       <!-- LEFT: order summary + gift -->
@@ -317,6 +320,20 @@
   });
   // give as a gift
   $("#gift-toggle").addEventListener("change",function(){ $("#gift-extra").hidden=!this.checked; });
+
+  // demo helper: autofill the checkout form to move through the flow quickly
+  $("#autofill").addEventListener("click",function(){
+    function set(sel,val){ var el=$(sel); if(el){ el.value=val; el.dispatchEvent(new Event("input",{bubbles:true})); } }
+    set("#email","alex@example.com");
+    set("#cname","Alex Rivera");
+    set(".cnum","4242 4242 4242 4242");
+    set(".cexp","04 / 27");
+    set(".ccvc","123");
+    set(".two .stack:last-child .in","94107");
+    var eula=$(".eula input[type=checkbox]"); if(eula && !eula.checked){ eula.checked=true; eula.dispatchEvent(new Event("change",{bubbles:true})); }
+    this.textContent="✓ Filled";
+    var b=this; setTimeout(function(){ b.textContent="⚡ Autofill"; },1400);
+  });
 
   buildTips(); renderTotals();
 })();
