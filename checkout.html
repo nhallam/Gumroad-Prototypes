@@ -166,7 +166,11 @@
 
   /* Coin Catch game */
   .game{ position:relative; width:100%; height:214px; border:var(--border); border-radius:var(--radius-sm); overflow:hidden; background:var(--stage, #f4f4f1); }
-  .game canvas{ display:block; width:100%; height:100%; }
+  .game canvas{ display:block; width:100%; height:100%; touch-action:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; cursor:grab; }
+  .game canvas:active{ cursor:grabbing; }
+  /* input hint swaps between keyboard + touch by pointer capability */
+  .g-hint-touch{ display:none; }
+  @media (hover:none) and (pointer:coarse){ .g-hint-key{ display:none; } .g-hint-touch{ display:inline; } }
   .g-timerbar{ position:absolute; top:0; left:0; right:0; height:6px; background:var(--hair); z-index:2; visibility:hidden; }
   .g-timerbar i{ display:block; height:100%; width:100%; background:var(--pink); border-right:2px solid var(--ink); }
   .g-hud{ position:absolute; top:14px; left:12px; right:12px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; pointer-events:none; visibility:hidden; font-variant-numeric:tabular-nums; }
@@ -330,7 +334,7 @@
               <div class="g-hud" id="g-hud"><span id="g-score">0 coins</span><span id="g-time">30s</span></div>
               <div class="g-screen" id="g-start">
                 <div class="g-title">🪙 Coin Catch</div>
-                <div class="g-sub">Use&nbsp; ← →&nbsp; to catch coins for 30 seconds. Each coin = US$0.10.<br>Your catch becomes the tip.</div>
+                <div class="g-sub"><span class="g-hint-key">Use&nbsp; ← →</span><span class="g-hint-touch">Drag or tap</span> to catch coins for 30 seconds. Each coin = US$0.10.<br>Your catch becomes the tip.</div>
                 <button class="g-btn primary" type="button" id="g-play">Start</button>
               </div>
               <div class="g-screen" id="g-result" hidden>
@@ -523,7 +527,7 @@
     var resTitle=$("#g-result-title"), resSub=$("#g-result-sub"), useBtn=$("#g-use");
     var timerBar=$("#g-timerbar"), bar=$("#g-bar");
     var FONT='"Hanken Grotesk",-apple-system,sans-serif';
-    var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0, vel=0;
+    var W=0,H=0,dpr=1, jarX=0, jarW=58, jarY=0, dir=0, vel=0, touchTarget=null;
     var ACC=2.0, FRIC=0.80, MAXV=15, KICK=6;   // basket: accel, friction, max speed, min tap nudge
     var coins=[], score=0, caught=0, running=false, raf=null, startT=0, lastT=0, lastSpawn=0, gained=0;
     var pop=0, pops=[];  // basket squash + floating "+$" feedback
@@ -569,10 +573,15 @@
       if(!running) return;
       var dt=Math.min((t-lastT)/16.67,3); lastT=t;
       if(t-lastSpawn>520){ spawn(); lastSpawn=t; }
-      vel += dir*ACC*dt;                       // build up speed while a key is held
-      if(dir===0) vel *= Math.pow(FRIC, dt);   // coast to a stop on release
-      vel = Math.max(-MAXV, Math.min(MAXV, vel));
-      jarX += vel*dt;
+      if(touchTarget!==null){                  // finger/drag: basket follows the touch point
+        jarX += (touchTarget - jarX) * Math.min(1, 0.45*dt);
+        vel=0;
+      } else {
+        vel += dir*ACC*dt;                     // build up speed while a key is held
+        if(dir===0) vel *= Math.pow(FRIC, dt); // coast to a stop on release
+        vel = Math.max(-MAXV, Math.min(MAXV, vel));
+        jarX += vel*dt;
+      }
       if(jarX < jarW/2){ jarX=jarW/2; vel=0; } else if(jarX > W-jarW/2){ jarX=W-jarW/2; vel=0; }  // stop at walls
       var ramp=1+(t-startT)/DUR*0.5;
       for(var i=coins.length-1;i>=0;i--){ var c=coins[i]; c.y+=c.vy*dt*ramp;
@@ -597,7 +606,7 @@
     function play(){
       startScr.hidden=true; resultScr.hidden=true;
       hud.style.visibility="visible"; timerBar.style.visibility="visible"; bar.style.width="100%";
-      size(); coins=[]; score=0; caught=0; pop=0; pops=[]; jarX=W/2; dir=0; vel=0; running=true;
+      size(); coins=[]; score=0; caught=0; pop=0; pops=[]; jarX=W/2; dir=0; vel=0; touchTarget=null; pressed=false; running=true;
       raf=requestAnimationFrame(function(t){ startT=t; lastT=t; lastSpawn=t; step(t); });
     }
     function end(){
@@ -614,7 +623,7 @@
       if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A") d=-1;
       else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D") d=1;
       if(!d) return;
-      dir=d;
+      dir=d; touchTarget=null;                       // keyboard reclaims control from touch
       if(!e.repeat && d*vel < KICK) vel = d*KICK;   // every fresh tap = a reliable nudge
       if(running) e.preventDefault();
     });
@@ -622,6 +631,36 @@
       if((e.key==="ArrowLeft"||e.key==="a"||e.key==="A")&&dir<0) dir=0;
       if((e.key==="ArrowRight"||e.key==="d"||e.key==="D")&&dir>0) dir=0;
     });
+    // Touch / mouse: drag or tap anywhere on the playfield to steer the basket
+    function pointerX(e){
+      var r=cv.getBoundingClientRect();
+      var cx=(e.clientX!=null)?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:0);
+      return Math.max(jarW/2, Math.min(W-jarW/2, cx-r.left));
+    }
+    var pressed=false;
+    // A tap sets a target the basket glides to (and stays at); a drag steers it
+    // live. touchTarget persists after release so a tap lands where you tapped;
+    // pressing an arrow key hands control back to the keyboard.
+    cv.addEventListener("pointerdown",function(e){
+      if(!running) return;
+      pressed=true; touchTarget=pointerX(e); dir=0;
+      if(e.pointerId!=null && cv.setPointerCapture){ try{ cv.setPointerCapture(e.pointerId); }catch(_){} }
+      e.preventDefault();
+    });
+    cv.addEventListener("pointermove",function(e){
+      if(!running || !pressed) return;
+      touchTarget=pointerX(e); e.preventDefault();
+    });
+    function pointerEnd(){ pressed=false; vel=0; }   // keep touchTarget so the basket settles where you left it
+    cv.addEventListener("pointerup",pointerEnd);
+    cv.addEventListener("pointercancel",pointerEnd);
+    // Safari fallback if Pointer Events are unavailable
+    if(!("PointerEvent" in window)){
+      cv.addEventListener("touchstart",function(e){ if(!running)return; pressed=true; touchTarget=pointerX(e); dir=0; e.preventDefault(); },{passive:false});
+      cv.addEventListener("touchmove",function(e){ if(!running||!pressed)return; touchTarget=pointerX(e); e.preventDefault(); },{passive:false});
+      cv.addEventListener("touchend",pointerEnd); cv.addEventListener("touchcancel",pointerEnd);
+    }
+
     window.addEventListener("resize",function(){ if(running) size(); });
     $("#g-play").addEventListener("click",play);
     $("#g-again").addEventListener("click",play);

@@ -18,8 +18,9 @@ rebuilt from the Figma design (file `YjLc2wyJ9b52NPNEWhlJNJ`, frame `2030:32`).
 **Concept 02 — checkout tipping.** A tip module embedded in the order summary with a
 type switcher: **Percentage** (preset grid), **Custom** ($ input with "N people left a
 tip" social proof), **Round Up** (rounds the order up to the nearest $10), and
-**Let's have fun** — a **Coin Catch** mini-game (← → move a basket to catch falling
-coins over 12s; each coin is US$0.10, gold ones US$0.30; your score becomes the tip).
+**Let's have fun** — a **Coin Catch** mini-game (← → on desktop, or **drag / tap** on
+touch, to move a basket and catch falling coins over 30s; each coin is US$0.10, gold
+ones US$0.30; your score becomes the tip).
 Neutral grey marks the active mode/method;
 pink marks the chosen tip. The payment column is visual scaffolding (non-functional).
 
